@@ -1,28 +1,31 @@
 <?php
 include 'connect.php';
 
+$message = '';
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (!empty($_POST['username']) && !empty($_POST['password'])) {
-        $username = $_POST['username'];
-        // Compute MD5 hash of the password
-        $hashed_password = md5($_POST['password']);
+    $username = trim($_POST['username'] ?? '');
+    $password = $_POST['password'] ?? '';
+
+    if (!empty($username) && !empty($password)) {
+        $hashed_password = md5($password);
 
         try {
-            $stmt = $db_staff_pdo->prepare('INSERT INTO `staff_info` (`staff_id`, `staff_pass`) VALUES (:user, :pass)');
-            $stmt->bindParam(':user', $username);
-            $stmt->bindParam(':pass', $hashed_password);
+            $stmt = $db_staff_pdo->prepare('INSERT INTO staff_info (staff_id, staff_pass) VALUES (:user, :pass)');
+            $stmt->execute([
+                ':user' => $username,
+                ':pass' => $hashed_password
+            ]);
 
-            if ($stmt->execute()) {
-                echo "<script>alert('Registration successful'); window.location.href='login.php';</script>";
-                exit();
-            }
-        } catch (PDOException $e) {
-            echo "<script>alert('Error: Username might already exist.'); window.location.href='register.php';</script>";
+            header("Location: login.php");
             exit();
+        } catch (PDOException $e) {
+            $message = "alert('Error: Username might already exist.'); window.location.href='register.php';";
+            echo $message;
         }
     } else {
-        echo "<script>alert('Please fill in all fields'); window.location.href='register.php';</script>";
-        exit();
+        $message = "alert('Please fill in all fields.'); window.location.href='register.php';";
+        echo $message;
     }
 }
 ?>
