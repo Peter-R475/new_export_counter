@@ -269,13 +269,19 @@ async function loadModel() {
     document.getElementById('status').innerText = 'Loading Model...';
 
     try {
-
         const modelUrl = 'exp.onnx';
 
+        // Set WASM multi-threading options to boost performance if GPU fails
+        ort.env.wasm.numThreads = Math.min(4, navigator.hardwareConcurrency || 2);
 
-        yolo_model = await ort.InferenceSession.create(modelUrl, {
-            executionProviders: ['webgpu', 'webgl', 'wasm']
-        });
+        const options = {
+            // Priority order for hardware acceleration
+            executionProviders: ['webgpu', 'webgl', 'wasm'],
+            // Enable graph optimization for better performance
+            graphOptimizationLevel: 'all'
+        };
+
+        yolo_model = await ort.InferenceSession.create(modelUrl, options);
 
         document.getElementById('status').innerText = 'Ready';
         console.log("YOLOv8 ONNX model loaded successfully.");
