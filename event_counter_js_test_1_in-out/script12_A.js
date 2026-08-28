@@ -428,15 +428,13 @@ async function detectPeople() {
         const zoneCenterX = countingZone.x + (countingZone.width / 2);
         const zoneCenterY = countingZone.y + (countingZone.height / 2);
         const angleRad = ((countingZone.angle || 0) * Math.PI) / 180;
-        const cosA = Math.cos(-angleRad); // Inverse rotation to convert world to local
+        const cosA = Math.cos(-angleRad);
         const sinA = Math.sin(-angleRad);
 
-        // Function: Check if point is inside rotated rectangle
         function isPointInRotatedRect(px, py) {
             const dx = px - zoneCenterX;
             const dy = py - zoneCenterY;
 
-            // Rotate point back to match axis-aligned bounding box
             const localX = zoneCenterX + (dx * cosA - dy * sinA);
             const localY = zoneCenterY + (dx * sinA + dy * cosA);
 
@@ -470,7 +468,6 @@ async function detectPeople() {
                 const det = currentDetections[matchedIdx];
                 matchedDetections.add(matchedIdx);
 
-                // Increment counter if person enters green zone for the first time
                 let insideZone = track.insideZone || false;
                 if (!insideZone && isPointInRotatedRect(det.centerX, det.centerY)) {
                     personCount += 1;
@@ -521,9 +518,6 @@ async function detectPeople() {
         document.getElementById('detections').innerText = `Zone Count: ${personCount}`;
         trackedPersons = nextTrackedPersons;
 
-
-        sendToBackend(currentParticipants, personCount);
-
         // Render bounding boxes
         Object.keys(trackedPersons).forEach(id => {
             const person = trackedPersons[id];
@@ -555,7 +549,6 @@ async function detectPeople() {
         lastTime = now;
     }
 }
-
 async function predictionLoop() {
     if (!isProcessingActive) return;
 
